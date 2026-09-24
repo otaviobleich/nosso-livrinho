@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nosso livrinho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="gOuro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9C7A3C"/><stop offset=".35" stop-color="#E8CD8A"/><stop offset=".55" stop-color="#C9A45C"/><stop offset=".75" stop-color="#F3E3B3"/><stop offset="1" stop-color="#A9853F"/></linearGradient></defs></svg>
+<main class="palco" id="palco" aria-label="Nosso livrinho">
+  <div class="livro" id="livro">
+    <div class="sombra-mesa" id="sombraMesa"></div>
+    <div class="folhas" id="folhas"><div class="lance" id="lance"></div></div>
+    <div class="elastico" id="elastico"></div>
+  </div>
+</main>
+<nav class="barra" id="barra" aria-label="Navegação do livrinho">
+  <div class="dica"><button id="btnDica"><span>toque no livrinho para abrir</span></button></div>
+  <div class="nav">
+    <button class="seta" id="btnAnt" aria-label="Página anterior"></button>
+    <button class="atalho" id="btnFrase">frase de hoje</button>
+    <button class="atalho" id="btnSumario">sumário</button>
+    <button class="seta" id="btnProx" aria-label="Próxima página"></button>
+  </div>
+</nav>
+<div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+<div class="veu" id="veu" hidden><div class="cartao" id="cartao" role="dialog" aria-modal="true" tabindex="-1"></div></div>
+<div class="revelar" id="revelar" role="dialog" aria-modal="true" aria-label="A surpresa" hidden>
+  <p class="rv-previa" id="rvPrevia" hidden>prévia: é assim que ela vai ver</p>
+  <div class="rv-cena"><div class="rv-env"><div class="rv-fundo"></div><div class="rv-folha"></div><div class="rv-bolso"></div><div class="rv-aba"></div><div class="rv-lacre"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.4c-.3 0-.6-.1-.8-.3C7.6 17.1 3.3 13.5 3.3 9.2c0-2.7 2.1-4.8 4.7-4.8 1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.6 0 4.7 2.1 4.7 4.8 0 4.3-4.3 7.9-7.9 11-.2.1-.5.2-.8.2z"/></svg></div></div></div>
+  <div class="rv-carta"><div class="rv-papel" id="rvPapel"></div><button class="btn pri" id="rvFechar">Fechar</button></div>
+</div>
+<div class="fx" id="fx" aria-hidden="true"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="frases.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
