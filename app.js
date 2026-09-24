@@ -628,6 +628,7 @@ async function abrirLivro() {
   if (L.aberto || L.animando) return;
   L.aberto = true;
   barra.classList.add('aberto');
+  notificarAbertura();
   if (!reduzido && elastico.animate) {
     elastico.animate([
       { transform: 'translateX(0) scaleY(1)', opacity: 1 },
@@ -919,6 +920,7 @@ function formFoto() {
         const dados = { fotoId, legenda: c.querySelector('#fLeg').value.trim().slice(0, 80), data: c.querySelector('#fData').value || hojeISO(), ar: +escolhida.ar.toFixed(4), giro: +(Math.random() * 5 - 2.5).toFixed(2), criadoEm: Date.now(), autor: autorAtual() };
         await Store.adicionar('fotos', dados, id => { marcarRecente(id, 'novo'); irDepois('fotos', id); });
         fecharFolha(); avisar('Foto colada. ♥');
+        notificar(`${nomeDela()} colou uma foto`, dados.legenda || 'Uma foto nova no álbum de vocês.', { tags: 'camera', anexo: Store.src(fotoId) });
       } catch (e) {
         if (fotoId && S.modo === 'nuvem') Store.apagarFoto(fotoId);
         tratarErro(e); btn.disabled = false; btn.textContent = 'Colar no livrinho';
@@ -981,10 +983,11 @@ function formDesejo(id) {
           if (feito && !x.feito) marcarRecente(x.id, 'pop');
           await Store.atualizar('desejos', x.id, { texto, nota, feito, feitoEm: feito ? (x.feitoEm || hojeISO()) : null });
           fecharFolha(); avisar(feito && !x.feito ? 'Desejo realizado! ♥' : 'Salvo.');
-          if (feito && !x.feito) coracoes(innerWidth / 2, innerHeight / 2, 16, 120);
+          if (feito && !x.feito) { coracoes(innerWidth / 2, innerHeight / 2, 16, 120); notificar(`${nomeDela()} realizou um desejo`, texto, { tags: 'sparkling_heart', prioridade: 4 }); }
         } else {
           await Store.adicionar('desejos', { texto, nota, feito: false, feitoEm: null, criadoEm: Date.now(), autor: autorAtual() }, nid => { marcarRecente(nid, 'novo'); irDepois('desejos', nid); });
           fecharFolha(); avisar('Desejo escrito. ♥');
+          notificar(`${nomeDela()} escreveu um desejo`, nota ? `${texto}\n${nota}` : texto, { tags: 'pencil2' });
         }
       } catch (e) { tratarErro(e); ok.disabled = false; }
     });
@@ -1000,7 +1003,10 @@ async function marcarDesejo(id, btn) {
   if (!x) return;
   const feito = !x.feito;
   if (feito) { const [cx, cy] = centro(btn); coracoes(cx, cy, 12, 70); marcarRecente(id, 'pop'); }
-  try { await Store.atualizar('desejos', id, { feito, feitoEm: feito ? hojeISO() : null }); if (feito) avisar('Desejo realizado! ♥'); }
+  try {
+    await Store.atualizar('desejos', id, { feito, feitoEm: feito ? hojeISO() : null });
+    if (feito) { avisar('Desejo realizado! ♥'); notificar(`${nomeDela()} realizou um desejo`, x.texto, { tags: 'sparkling_heart', prioridade: 4 }); }
+  }
   catch (e) { tratarErro(e); }
 }
 
@@ -1049,6 +1055,8 @@ function formViagem(id) {
         fecharFolha();
         avisar(virouFomos ? 'Mais um lugar nosso! ♥' : x ? 'Salvo.' : 'Lugar anotado. ♥');
         if (virouFomos) coracoes(innerWidth / 2, innerHeight / 2, 16, 120);
+        if (virouFomos) notificar(`${nomeDela()} marcou que vocês foram`, lugar, { tags: 'round_pushpin', prioridade: 4, anexo: fotoNova ? Store.src(fotoNova) : '' });
+        else if (!x) notificar(`${nomeDela()} anotou um lugar`, dados.motivo ? `${lugar}: ${dados.motivo}` : lugar, { tags: 'airplane', anexo: fotoNova ? Store.src(fotoNova) : '' });
       } catch (e) {
         if (fotoNova && S.modo === 'nuvem') Store.apagarFoto(fotoNova);
         tratarErro(e); ok.disabled = false; ok.textContent = x ? 'Salvar' : 'Anotar no livrinho';
@@ -1116,6 +1124,32 @@ function formAutor() {
   });
 }
 
+/* ================= notificações (ntfy) ================= */
+function ntfyConfig() {
+  const c = window.LIVRINHO_CONFIG || {};
+  const topico = String(c.ntfyTopico || '').trim();
+  if (!topico || S.dono) return null;
+  return { topico, base: String(c.ntfyServidor || 'https://ntfy.sh').replace(/\/+$/, '') };
+}
+function notificar(titulo, msg, op = {}) {
+  const n = ntfyConfig();
+  if (!n) return;
+  const q = new URLSearchParams({ title: titulo, tags: op.tags || 'love_letter', priority: String(op.prioridade || 3) });
+  try { if (/^https?:/.test(location.origin)) q.set('click', location.origin + location.pathname); } catch (e) { /* ok */ }
+  if (op.anexo && /^https?:/.test(op.anexo)) q.set('attach', op.anexo);
+  try { fetch(`${n.base}/${encodeURIComponent(n.topico)}?${q}`, { method: 'POST', body: String(msg || '').slice(0, 1000) || ' ', mode: 'no-cors', keepalive: true }).catch(() => {}); } catch (e) { /* ok */ }
+}
+const nomeDela = () => S.config.nomeDela || 'Ela';
+function notificarAbertura() {
+  if (!ntfyConfig()) return;
+  try {
+    const k = 'nosso-livrinho:avisoAbertura', t = +localStorage.getItem(k) || 0;
+    if (Date.now() - t < 30 * 60 * 1000) return;
+    localStorage.setItem(k, String(Date.now()));
+  } catch (e) { /* ok */ }
+  notificar(`${nomeDela()} abriu o livrinho`, `Frase de hoje: ${fraseDoDia().texto}`, { tags: 'book' });
+}
+
 /* ================= a surpresa ================= */
 const rv = $('#revelar');
 const revelacaoAberta = () => !rv.hidden;
@@ -1129,6 +1163,7 @@ function tocarSurpresa(el) {
     avisar(falta > 30 ? 'Ainda não… paciência, meu amor. ♥' : `Falta${falta === 1 ? '' : 'm'} só ${falta} ${falta === 1 ? 'dia' : 'dias'}. ♥`);
     return;
   }
+  notificar(`${nomeDela()} abriu a surpresa!`, 'Ela acabou de abrir a carta do dia 365. ♥', { tags: 'love_letter,tada', prioridade: 5 });
   abrirRevelacao({});
 }
 async function abrirRevelacao(op) {

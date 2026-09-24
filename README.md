@@ -42,6 +42,17 @@ Para tirar o modo autor de um aparelho, abra o site com `?sair` no final.
 
 Mande pra ela o endereço **sem** o `?autor`.
 
+## 5. Notificações no seu celular (ntfy)
+
+Você recebe um aviso quando ela abre o livrinho (no máximo 1 vez a cada 30 minutos), cola uma foto (a foto vem junto),
+escreve ou realiza um desejo, anota um lugar, marca que vocês foram e quando ela abre a surpresa.
+
+1. Instale o app **ntfy** (Android ou iPhone).
+2. Toque em **+** (Subscribe to topic) e digite o tópico que está em `config.js`: **livrinho-kemelly-q3q7z41etn**
+3. Para testar, abra o site numa aba anônima **sem** o `?autor` e escreva um desejo.
+
+O que você faz no seu aparelho de autor não gera notificação. Para trocar o tópico ou desligar, edite `ntfyTopico` em `config.js`.
+
 ## Bom saber
 
 - Qualquer pessoa com o link consegue ver e editar o livrinho, então compartilhe só com ela.
